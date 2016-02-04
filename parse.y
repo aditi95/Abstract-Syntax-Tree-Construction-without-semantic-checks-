@@ -5,11 +5,13 @@
 
 %token VOID INT FLOAT IF ELSE WHILE FOR RETURN IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL EQ_OP NE_OP LE_OP GE_OP AND_OP OR_OP INC_OP PTR_OP STRUCT
 
-%type<std::string> unary_operator IDENTIFIER STRING_LITERAL
+%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*;
+
+%type<STRING> unary_operator IDENTIFIER STRING_LITERAL
 %type<int> INT_CONSTANT
 %type<float> FLOAT_CONSTANT
-%type<exp_astnode*> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression
-%type<stmt_astnode*> compound_statement statement assignment_statement selection_statement iteration_statement
+%type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression
+%type<STMAST> compound_statement statement assignment_statement selection_statement iteration_statement
 
 %%
 

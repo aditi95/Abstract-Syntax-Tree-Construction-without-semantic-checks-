@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 class abstract_astnode
 {
 	public:
 		virtual void print () = 0;
-		// virtual std::string generate_code(const symbolTable&) = 0;
+		// virtual string generate_code(const symbolTable&) = 0;
 		// virtual basic_types getType() = 0;
 		// virtual bool checkTypeofAST() = 0;
 		protected:
@@ -30,7 +32,7 @@ class unary_astnode : public exp_astnode
 		}
 		virtual void print()
 		{
-			std::cout<< "("<<exp_name << " "<<left->print()<<")"; 
+			cout<< "("<<exp_name << " "<<left->print()<<")"; 
 		}
 };
 
@@ -47,7 +49,7 @@ class binary_astnode : public exp_astnode
 		}
 		virtual void print()
 		{
-			std::cout<< "("<<exp_name << " "<<left->print()<<" "<<right->print()<<")"; 
+			cout<< "("<<exp_name << " "<<left->print()<<" "<<right->print()<<")"; 
 		}
 };
 
@@ -60,7 +62,7 @@ class float_astnode : public exp_astnode
 		float_astnode(string s){val = s;}
 		virtual void print()
 		{
-			std::cout<< "(FloatConst " << " "<<val<<")"; 
+			cout<< "(FloatConst " << " "<<val<<")"; 
 		}
 };
 
@@ -72,7 +74,7 @@ class int_astnode : public exp_astnode
 		int_astnode(string s){val = s;}
 		virtual void print()
 		{
-			std::cout<< "(IntConst " << " "<<val<<")"; 
+			cout<< "(IntConst " << " "<<val<<")"; 
 		}
 };
 
@@ -84,7 +86,7 @@ class string_astnode : public exp_astnode
 		string_astnode(string s){val = s;}
 		virtual void print()
 		{
-			std::cout<< "(StringConst " << " "<<val<<")"; 
+			cout<< "(StringConst " << " "<<val<<")"; 
 		}
 };
 
@@ -97,7 +99,7 @@ class id_astnode : public exp_astnode
 		id_astnode(string s){val = s;}
 		virtual void print()
 		{
-			std::cout<< "(Id " << " \""<<val<<"\")"; 
+			cout<< "(Id " << " \""<<val<<"\")"; 
 		}
 };
 
@@ -124,7 +126,7 @@ class ass_astnode : public stmt_astnode
 		}
 		virtual void print()
 		{
-			std::cout<< "("<<stmt_name << " "<<left->print() <<" " << right->print()<<")"; 
+			cout<< "("<<stmt_name << " "<<left->print() <<" " << right->print()<<")"; 
 		}
 
 };
@@ -145,7 +147,7 @@ class if_astnode : public stmt_astnode
 		}
 		virtual void print()
 		{
-			std::cout<< "("<<stmt_name << " "<<left->print() <<"\n"<<middle->print<<"\n" << right->print()<<")"; 
+			cout<< "("<<stmt_name << " "<<left->print() <<"\n"<<middle->print<<"\n" << right->print()<<")"; 
 		}
 
 };
@@ -158,7 +160,7 @@ class empty_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			std::cout<< "("<<stmt_name<<")"; 
+			cout<< "("<<stmt_name<<")"; 
 		}
 
 };
@@ -177,7 +179,7 @@ class return_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			std::cout<< "("<<stmt_name << " "<<left->print()<<")"; 
+			cout<< "("<<stmt_name << " "<<left->print()<<")"; 
 		}
 
 };
@@ -200,7 +202,7 @@ class for_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			std::cout<< "("<<stmt_name <<" "<<left->print()<<"\n"<<middle->print()<<"\n"<<right->print()<<"\n"<<stmt->print()<<")"; 
+			cout<< "("<<stmt_name <<" "<<left->print()<<"\n"<<middle->print()<<"\n"<<right->print()<<"\n"<<stmt->print()<<")"; 
 		}
 
 };
@@ -220,7 +222,7 @@ class while_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			std::cout<< "("<<stmt_name << " "<<left->print()<<"\n"<<stmt->print()<<")"; 
+			cout<< "("<<stmt_name << " "<<left->print()<<"\n"<<stmt->print()<<")"; 
 		}
 
 };
@@ -237,7 +239,7 @@ class block_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			std::cout<< "(Block ["<<list->print()<<"])";
+			cout<< "(Block ["<<list->print()<<"])";
 		}
 
 };
@@ -255,7 +257,7 @@ class list_astnode : public stmt_astnode
 		}
 		virtual void print()
 		{
-			std::cout<< "("<<stmt->print()<<"\n"<<list->print()<<")"; 
+			cout<< "("<<stmt->print()<<"\n"<<list->print()<<")"; 
 		}
 
 };
