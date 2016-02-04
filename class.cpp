@@ -103,12 +103,13 @@ class func_astnode : public exp_astnode
 		string val;
 		vector <exp_astnode *> args;
 	public:
-		func_astnode(string s, vector<exp_astnode *> a){
+		func_astnode(string s){
 			val = s;
-			for(int i = 0; i<a.size();i++)
-			{
-				args.push_back(a[i]);
-			}
+			args = new vector<exp_astnode*>();
+		}
+		void addEXPASTVec(vector <exp_astnode *> a)
+		{
+			args = a;
 		}
 		virtual void print()
 		{
@@ -341,10 +342,12 @@ class arrref_astnode : public ref_astnode
 		arrref_astnode(id_astnode *a,vector <exp_astnode *> b)
 		{
 			id=a;
-			for(int i = 0; i<b.size();i++)
-			{
-				params.push_back(b[i]);
-			}
+			params = new vector<exp_astnode*>();
+		}
+
+		void addEXPAST(exp_astnode * exp_ast)
+		{
+			(*params).push_back(exp_ast);
 		}
 
 		virtual void print()

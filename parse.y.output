@@ -1,4 +1,4 @@
-[[parse.y (info)] Line 190: 
+[[parse.y (info)] Line 308: 
 Production Rules
 (rule precedences determined from %prec or 1st terminal between parentheses):
 1: translation_unit ->  struct_specifier
@@ -109,6 +109,10 @@ Symbolic Terminal tokens:
    275: INC_OP
    276: PTR_OP
    277: STRUCT
+   294: id_astnode
+   295: arrref_astnode
+   296: ptr_astnode
+   297: deref_astnode
    123: '{'
    125: '}'
     59: ';'
@@ -145,18 +149,18 @@ FIRST sets:
    statement_list: { RETURN IDENTIFIER IF WHILE FOR '{' ';' '*' '&' }
    statement: { RETURN IDENTIFIER IF WHILE FOR '{' ';' '*' '&' }
    assignment_statement: { IDENTIFIER ';' '*' '&' }
-   expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
-   logical_and_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
-   equality_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
-   relational_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
-   additive_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
-   multiplicative_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
-   unary_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
+   expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
+   logical_and_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
+   equality_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
+   relational_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
+   additive_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
+   multiplicative_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
+   unary_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
    postfix_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' }
-   expression_list: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '!' '&' '-' }
+   expression_list: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' '-' '!' }
    primary_expression: { IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL '*' '(' '&' }
    l_expression: { IDENTIFIER '*' '&' }
-   unary_operator: { '!' '-' }
+   unary_operator: { '-' '!' }
    selection_statement: { IF }
    iteration_statement: { WHILE FOR }
    declaration: { VOID INT FLOAT STRUCT }

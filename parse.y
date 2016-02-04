@@ -5,13 +5,14 @@
 
 %token VOID INT FLOAT IF ELSE WHILE FOR RETURN IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL EQ_OP NE_OP LE_OP GE_OP AND_OP OR_OP INC_OP PTR_OP STRUCT
 
-%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*; INT : int; FLOAT : float;
+%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*; REFAST : ref_astnode* ; INT : int; FLOAT : float;
 
 %type<STRING> unary_operator IDENTIFIER STRING_LITERAL
 %type<INT> INT_CONSTANT
 %type<FLOAT> FLOAT_CONSTANT
 %type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression
 %type<STMAST> compound_statement statement assignment_statement selection_statement iteration_statement
+%type<REFAST> id_astnode arrref_astnode ptr_astnode deref_astnode
 
 %%
 
@@ -62,7 +63,7 @@ declarator
         ;
 
 constant_expression 
-        : INT_CONSTANT {std::cout<<"dvals "<<$1<<endl;}
+        : INT_CONSTANT
         | FLOAT_CONSTANT 
         ;
 
@@ -85,75 +86,183 @@ compound_statement
 	;
 
 statement_list
-	: statement		
+	: statement	
+	{
+		$$ = new vector<stmt_astnode *>();
+		($$)->push_back($1);
+	}	
         | statement_list statement	
+        {
+        	((vector<stmt_astnode *>*)$1)->push_back($2);
+        	$$ = $1;
+        }
 	;
 
 statement
         : '{' statement_list '}'  //a solution to the local decl problem
-        | selection_statement 	
-        | iteration_statement 	
+        {
+		$$ = new block_astnode($2);
+	  }
+        | selection_statement 
+        {
+        	$$ = $1;
+        }	
+        | iteration_statement 
+        {
+        	$$ = $1;
+        }	
 	| assignment_statement	
-        | RETURN expression ';'	
+	{
+		$$ = $1;
+	}
+        | RETURN expression ';'
+        {
+        	$$ = new return_astnode($2);
+        }	
         ;
 
 assignment_statement
-	: ';' 								
-	|  l_expression '=' expression ';'	
+	: ';' 	
+	{
+		$$ = new empty_astnode();
+	}							
+	|  l_expression '=' expression ';'
+	{
+		$$ = new ass_astnode($1,$3);
+	}	
 	;
 
 expression
 	: logical_and_expression
+	{
+		$$ = $1;
+	}
         | expression OR_OP logical_and_expression
+        {
+        	$$ = new binary_astnode("OR",$1,$3);
+        }
 	;
 logical_and_expression
         : equality_expression
+        {
+        	$$ = $1;
+        }
         | logical_and_expression AND_OP equality_expression 
+        {
+        	$$ = new binary_astnode("AND",$1,$3);
+        }
 	;
 
 equality_expression
 	: relational_expression 
+	{
+		$$ = $1;
+	}
         | equality_expression EQ_OP relational_expression 	
+        {
+        	$$ = new binary_astnode("EQ_OP",$1,$3);
+        }
 	| equality_expression NE_OP relational_expression
+	{
+		$$ = new binary_astnode("NE_OP",$1,$3);
+	}
 	;
 relational_expression
 	: additive_expression
+	{
+		$$ = $1;
+	}
         | relational_expression '<' additive_expression 
+        {
+        	$$ = new binary_astnode("LT",$1,$3);
+        }
 	| relational_expression '>' additive_expression 
-	| relational_expression LE_OP additive_expression 
+	{
+		$$ = new binary_astnode("GT",$1,$3);
+	}
+	| relational_expression LE_OP additive_expression
+	{
+		$$ = new binary_astnode("LE_OP",$1,$3);
+	} 
         | relational_expression GE_OP additive_expression 
+        {
+        	$$ = new binary_astnode("GE_OP",$1,$3);
+        }
 	;
 
 additive_expression 
 	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression 
+	{
+		$$ = $1;
+	}
+	| additive_expression '+' multiplicative_expression
+	{
+		$$ = new binary_astnode("Plus",$1,$3);
+	} 
 	| additive_expression '-' multiplicative_expression 
+	{
+		$$ = new binary_astnode("Minus",$1,$3);
+	}
 	;
 
 multiplicative_expression
 	: unary_expression
+	{
+		$$ = $1;
+	}
 	| multiplicative_expression '*' unary_expression 
+	{
+		$$ = new binary_astnode("Mult",$1,$3);
+	}
 	| multiplicative_expression '/' unary_expression 
+	{
+		$$ = new binary_astnode("Div",$1,$3);
+	}
 	;
 unary_expression
-	: postfix_expression  				
-	| unary_operator postfix_expression 
+	: postfix_expression 
+	{
+		$$ = $1;
+	} 				
+	| unary_operator postfix_expression
+	{
+		$$ = new unary_astnode($1,$2);
+	} 
 	;
 
 postfix_expression
-	: primary_expression  				
-        | IDENTIFIER '(' ')' 				
+	: primary_expression  	
+	{
+		$$ = $1;
+	}			
+        | IDENTIFIER '(' ')' 		
+        {
+        	$$ = new func_astnode(new id_astnode($1));
+        }		
 	| IDENTIFIER '(' expression_list ')' 
-	| l_expression INC_OP 				
+	{
+		$$ = new func_astnode(new id_astnode($1));
+		((func_astnode *)$$)->addEXPASTVec($3);
+	}
+	| l_expression INC_OP 	
+	{
+		$$ = new unary_astnode("PP",$2);
+	}			
 	;
 
 primary_expression
 	: l_expression
+	{
+		$$ = $1;
+	}
         | l_expression '=' expression   
-        | INT_CONSTANT {std::cout<<"dvalds "<<$1<<endl;}
+        | INT_CONSTANT
 	| FLOAT_CONSTANT
         | STRING_LITERAL
-	| '(' expression ')' 	
+	| '(' expression ')' 
+	{
+		$$ = $2;
+	}	
 	;
 
 l_expression
