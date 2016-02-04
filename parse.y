@@ -5,11 +5,11 @@
 
 %token VOID INT FLOAT IF ELSE WHILE FOR RETURN IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL EQ_OP NE_OP LE_OP GE_OP AND_OP OR_OP INC_OP PTR_OP STRUCT
 
-%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*;
+%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*; INT : int; FLOAT : float;
 
 %type<STRING> unary_operator IDENTIFIER STRING_LITERAL
-%type<int> INT_CONSTANT
-%type<float> FLOAT_CONSTANT
+%type<INT> INT_CONSTANT
+%type<FLOAT> FLOAT_CONSTANT
 %type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression
 %type<STMAST> compound_statement statement assignment_statement selection_statement iteration_statement
 
@@ -37,7 +37,7 @@ type_specifier
 
 base_type 
         : VOID 	
-        | INT   
+        | INT {std::cout<<"dval "<<d_val__<<endl;}  
 	| FLOAT 
         | STRUCT IDENTIFIER 
         ;
@@ -62,14 +62,26 @@ declarator
         ;
 
 constant_expression 
-        : INT_CONSTANT 
+        : INT_CONSTANT {std::cout<<"dvals "<<$1<<endl;}
         | FLOAT_CONSTANT 
         ;
 
 compound_statement
 	: '{' '}' 
+	{
+		$$ = new block_astnode(new vector<stmt_astnode *> ());
+		($$)->print();
+	}
 	| '{' statement_list '}' 
+	{
+		$$ = new block_astnode($2);
+		($$)->print();
+	}
         | '{' declaration_list statement_list '}' 
+        {
+		$$ = new block_astnode($3);
+		($$)->print();
+	}
 	;
 
 statement_list
@@ -138,7 +150,7 @@ postfix_expression
 primary_expression
 	: l_expression
         | l_expression '=' expression   
-        | INT_CONSTANT 
+        | INT_CONSTANT {std::cout<<"dvalds "<<$1<<endl;}
 	| FLOAT_CONSTANT
         | STRING_LITERAL
 	| '(' expression ')' 	
@@ -185,5 +197,3 @@ declarator_list
 	: declarator
 	| declarator_list ',' declarator 
  	;
-
-

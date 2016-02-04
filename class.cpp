@@ -10,9 +10,9 @@ class abstract_astnode
 		// virtual string generate_code(const symbolTable&) = 0;
 		// virtual basic_types getType() = 0;
 		// virtual bool checkTypeofAST() = 0;
-		protected:
-		// virtual void setType(basic_types) = 0;
-	private:
+	// 	protected:
+	// 	// virtual void setType(basic_types) = 0;
+	// private:
 		// typeExp astnode_type;
 };
 class exp_astnode : public abstract_astnode
@@ -20,6 +20,7 @@ class exp_astnode : public abstract_astnode
 	protected:
 		string exp_name;
 };
+
 class unary_astnode : public exp_astnode
 {
 	private:
@@ -32,7 +33,9 @@ class unary_astnode : public exp_astnode
 		}
 		virtual void print()
 		{
-			cout<< "("<<exp_name << " "<<left->print()<<")"; 
+			cout<< "("<<exp_name << " ";
+			left->print();
+			cout<<")"; 
 		}
 };
 
@@ -49,7 +52,11 @@ class binary_astnode : public exp_astnode
 		}
 		virtual void print()
 		{
-			cout<< "("<<exp_name << " "<<left->print()<<" "<<right->print()<<")"; 
+			cout<< "("<<exp_name << " ";
+			left->print();
+			cout<<" ";
+			right->print();
+			cout<<")"; 
 		}
 };
 
@@ -90,19 +97,30 @@ class string_astnode : public exp_astnode
 		}
 };
 
-
-class id_astnode : public exp_astnode
+class func_astnode : public exp_astnode
 {
 	private:
 		string val;
+		vector <exp_astnode *> args;
 	public:
-		id_astnode(string s){val = s;}
+		func_astnode(string s, vector<exp_astnode *> a){
+			val = s;
+			for(int i = 0; i<a.size();i++)
+			{
+				args.push_back(a[i]);
+			}
+		}
 		virtual void print()
 		{
-			cout<< "(Id " << " \""<<val<<"\")"; 
+			cout<< "(" <<val ;
+			for(int i = 0; i <args.size();i++)
+			{
+				args[i]->print();
+				cout<<endl;
+			} 
+			cout<<")"; 
 		}
 };
-
 
 class stmt_astnode : public abstract_astnode
 {
@@ -110,13 +128,10 @@ class stmt_astnode : public abstract_astnode
 		string stmt_name;
 };
 
-
-
-
 class ass_astnode : public stmt_astnode
 {
 	private:
-		exp_astnode * left, right;
+		exp_astnode * left, *right;
 	public:
 		ass_astnode(exp_astnode *l, exp_astnode *r)
 		{
@@ -126,7 +141,11 @@ class ass_astnode : public stmt_astnode
 		}
 		virtual void print()
 		{
-			cout<< "("<<stmt_name << " "<<left->print() <<" " << right->print()<<")"; 
+			cout<< "("<<stmt_name << " ";
+			left->print();
+			cout<<" ";
+			right->print();
+			cout<<")"; 
 		}
 
 };
@@ -147,7 +166,13 @@ class if_astnode : public stmt_astnode
 		}
 		virtual void print()
 		{
-			cout<< "("<<stmt_name << " "<<left->print() <<"\n"<<middle->print<<"\n" << right->print()<<")"; 
+			cout<< "("<<stmt_name << " ";
+			left->print();
+			cout<<"\n";
+			middle->print();
+			cout<<"\n";
+			right->print();
+			cout<<")"; 
 		}
 
 };
@@ -179,7 +204,9 @@ class return_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			cout<< "("<<stmt_name << " "<<left->print()<<")"; 
+			cout<< "("<<stmt_name << " ";
+			left->print();
+			cout<<")"; 
 		}
 
 };
@@ -188,7 +215,7 @@ class return_astnode : public stmt_astnode
 class for_astnode : public stmt_astnode
 {
 	private:
-		exp_astnode * left, middle, right;
+		exp_astnode * left, *middle, *right;
 		stmt_astnode *stmt;
 	public:
 		for_astnode(exp_astnode *l, exp_astnode *m, exp_astnode *r, stmt_astnode *s)
@@ -202,7 +229,15 @@ class for_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			cout<< "("<<stmt_name <<" "<<left->print()<<"\n"<<middle->print()<<"\n"<<right->print()<<"\n"<<stmt->print()<<")"; 
+			cout<< "("<<stmt_name <<" ";
+			left->print();
+			cout<<"\n";
+			middle->print();
+			cout<<"\n";
+			right->print();
+			cout<<"\n";
+			stmt->print();
+			cout<<")"; 
 		}
 
 };
@@ -222,24 +257,11 @@ class while_astnode : public stmt_astnode
 
 		virtual void print()
 		{
-			cout<< "("<<stmt_name << " "<<left->print()<<"\n"<<stmt->print()<<")"; 
-		}
-
-};
-class block_astnode : public stmt_astnode
-{
-	private:
-		list_astnode *block;
-	public:
-		while_astnode(list_astnode *l)
-		{
-			stmt_name = "Block";
-			block = l;
-		}
-
-		virtual void print()
-		{
-			cout<< "(Block ["<<list->print()<<"])";
+			cout<< "("<<stmt_name << " ";
+			left->print();
+			cout<<"\n";
+			stmt->print();
+			cout<<")"; 
 		}
 
 };
@@ -257,8 +279,123 @@ class list_astnode : public stmt_astnode
 		}
 		virtual void print()
 		{
-			cout<< "("<<stmt->print()<<"\n"<<list->print()<<")"; 
+			cout<< "(";
+			stmt->print();
+			cout<<"\n";
+			list->print();
+			cout<<")"; 
 		}
 
 };
 
+class block_astnode : public stmt_astnode
+{
+	private:
+		list_astnode *block;
+	public:
+		block_astnode(list_astnode *l)
+		{
+			stmt_name = "Block";
+			block = l;
+		}
+
+		virtual void print()
+		{
+			cout<< "(Block [";
+			block->print();
+			cout<<"])";
+		}
+
+};
+
+class ref_astnode : public abstract_astnode
+{
+	protected:
+		string ref_name;
+};
+
+class id_astnode : public ref_astnode
+{
+	private:
+		string id_name;
+	public:
+		id_astnode(string name)
+		{
+			ref_name = "Id";
+			id_name = name;
+		}
+
+		virtual void print()
+		{
+			cout<< "("<<ref_name<<" \"" <<id_name<<"\" )" ;
+		}
+
+};
+
+class arrref_astnode : public ref_astnode
+{
+	private:
+		id_astnode *id;
+		vector <exp_astnode *> params;
+	public:
+		arrref_astnode(id_astnode *a,vector <exp_astnode *> b)
+		{
+			id=a;
+			for(int i = 0; i<b.size();i++)
+			{
+				params.push_back(b[i]);
+			}
+		}
+
+		virtual void print()
+		{
+			cout<< "(";
+			id->print();
+			cout<<" [ ";
+			for(int i = 0; i<params.size();i++)
+			{
+				params[i]->print();
+				cout<<"\n";
+			}
+			cout<<"]";
+		}
+
+};
+
+class ptr_astnode : public ref_astnode
+{
+	private:
+		ref_astnode *id;
+	public:
+		ptr_astnode(ref_astnode *a)
+		{
+			id=a;
+		}
+
+		virtual void print()
+		{
+			cout<< "( *";
+			id->print();
+			cout<<")";
+		}
+
+};
+
+class deref_astnode : public ref_astnode
+{
+	private:
+		ref_astnode *id;
+	public:
+		deref_astnode(ref_astnode *a)
+		{
+			id=a;
+		}
+
+		virtual void print()
+		{
+			cout<< "( &";
+			id->print();
+			cout<<")";
+		}
+
+};
