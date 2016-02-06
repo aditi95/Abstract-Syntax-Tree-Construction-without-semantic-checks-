@@ -1,9 +1,5 @@
 int f() {
     int a, b;
-    for(x=0;x<10;x++)
-    {
-    	a=b;
-    }
     if(y>1)
     {
     	x=x-1;

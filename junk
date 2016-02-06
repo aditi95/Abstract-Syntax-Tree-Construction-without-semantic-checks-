@@ -1,0 +1,5 @@
+(Block [(((If (GT (Id "y" ) (IntConst  1))
+(Block [(((Ass (Id "x" ) (Minus (Id "x" ) (IntConst  1))))
+(Ass (Id "y" ) (Plus (Id "y" ) (IntConst  1))))])
+(Empty)))
+(Ass (Id "a" ) (IntConst  52020)))])
