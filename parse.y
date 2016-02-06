@@ -5,19 +5,19 @@
 
 %token VOID INT FLOAT IF ELSE WHILE FOR RETURN IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL EQ_OP NE_OP LE_OP GE_OP AND_OP OR_OP INC_OP PTR_OP STRUCT
 
-%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*; REFAST : ref_astnode* ; INT : int; FLOAT : float;
+%polymorphic STRING : std::string; EXPAST : exp_astnode*; STMAST : stmt_astnode*; REFAST : ref_astnode* ; INT1 : int; FLOAT1 : float;
 
-%type<STRING> unary_operator IDENTIFIER STRING_LITERAL
-%type<INT> INT_CONSTANT
-%type<FLOAT> FLOAT_CONSTANT
-%type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression
-%type<STMAST> compound_statement statement assignment_statement selection_statement iteration_statement
-%type<REFAST> id_astnode arrref_astnode ptr_astnode deref_astnode
+%type<STRING> unary_operator IDENTIFIER STRING_LITERAL INC_OP
+%type<INT1> INT_CONSTANT
+%type<FLOAT1> FLOAT_CONSTANT
+%type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression constant_expression expression_list
+%type<STMAST> compound_statement statement assignment_statement selection_statement iteration_statement statement_list
+%type<REFAST> declarator
 
 %%
 
 translation_unit 
-        :  struct_specifier
+        :  struct_specifier{}
  	| function_definition 
  	| translation_unit function_definition 
         | translation_unit struct_specifier
@@ -38,7 +38,7 @@ type_specifier
 
 base_type 
         : VOID 	
-        | INT {std::cout<<"dval "<<d_val__<<endl;}  
+        | INT
 	| FLOAT 
         | STRUCT IDENTIFIER 
         ;
@@ -50,6 +50,9 @@ fun_declarator
 
 parameter_list
 	: parameter_declaration 
+	{
+		$$ = $1;
+	}
 	| parameter_list ',' parameter_declaration 
 	;
 
@@ -59,18 +62,28 @@ parameter_declaration
 
 declarator
 	: IDENTIFIER 
+	{
+		$$ = new id_astnode($1);
+	}
 	| declarator '[' constant_expression ']' 
-        ;
+	{}
+	;
 
 constant_expression 
         : INT_CONSTANT
+        {
+        	$$ = new int_astnode($1);
+        }
         | FLOAT_CONSTANT 
+        {
+        	$$ = new float_astnode($1);
+        }
         ;
 
 compound_statement
 	: '{' '}' 
 	{
-		$$ = new block_astnode(new vector<stmt_astnode *> ());
+		$$ = new empty_astnode();
 		($$)->print();
 	}
 	| '{' statement_list '}' 
@@ -88,13 +101,11 @@ compound_statement
 statement_list
 	: statement	
 	{
-		$$ = new vector<stmt_astnode *>();
-		($$)->push_back($1);
+		$$ = new list_astnode($1);
 	}	
         | statement_list statement	
         {
-        	((vector<stmt_astnode *>*)$1)->push_back($2);
-        	$$ = $1;
+        	$$ = new list_astnode($2,$1);
         }
 	;
 
@@ -128,7 +139,7 @@ assignment_statement
 	}							
 	|  l_expression '=' expression ';'
 	{
-		$$ = new ass_astnode($1,$3);
+		$$ = new assgn_astnode($1,$3);
 	}	
 	;
 
@@ -139,7 +150,7 @@ expression
 	}
         | expression OR_OP logical_and_expression
         {
-        	$$ = new binary_astnode("OR",$1,$3);
+        	$$ = new binary_astnode("Or",$1,$3);
         }
 	;
 logical_and_expression
@@ -149,7 +160,7 @@ logical_and_expression
         }
         | logical_and_expression AND_OP equality_expression 
         {
-        	$$ = new binary_astnode("AND",$1,$3);
+        	$$ = new binary_astnode("And",$1,$3);
         }
 	;
 
@@ -212,11 +223,11 @@ multiplicative_expression
 	}
 	| multiplicative_expression '*' unary_expression 
 	{
-		$$ = new binary_astnode("Mult",$1,$3);
+		$$ = new binary_astnode("Multiply",$1,$3);
 	}
 	| multiplicative_expression '/' unary_expression 
 	{
-		$$ = new binary_astnode("Div",$1,$3);
+		$$ = new binary_astnode("Divide",$1,$3);
 	}
 	;
 unary_expression
@@ -237,16 +248,15 @@ postfix_expression
 	}			
         | IDENTIFIER '(' ')' 		
         {
-        	$$ = new func_astnode(new id_astnode($1));
+        	$$ = new func_astnode($1);
         }		
 	| IDENTIFIER '(' expression_list ')' 
 	{
-		$$ = new func_astnode(new id_astnode($1));
-		((func_astnode *)$$)->addEXPASTVec($3);
+		$$ = new func_astnode($1,$3);
 	}
 	| l_expression INC_OP 	
 	{
-		$$ = new unary_astnode("PP",$2);
+		$$ = new unary_astnode($2,$1);
 	}			
 	;
 
@@ -255,10 +265,22 @@ primary_expression
 	{
 		$$ = $1;
 	}
-        | l_expression '=' expression   
+        | l_expression '=' expression
+        {
+        	$$ = new binary_astnode("Equals",$1,$3);
+        }   
         | INT_CONSTANT
+        {
+        	$$ = new int_astnode($1);
+        }
 	| FLOAT_CONSTANT
+	{
+		$$ = new float_astnode($1);
+	}
         | STRING_LITERAL
+        {
+        	$$ = new string_astnode($1);
+        }
 	| '(' expression ')' 
 	{
 		$$ = $2;
@@ -267,30 +289,69 @@ primary_expression
 
 l_expression
         : IDENTIFIER
+        {
+        	$$ = new id_astnode($1);
+        }
         | l_expression '[' expression ']' 	
+        {}
         | '*' l_expression
+        {
+        	$$ = new ptr_astnode($2);
+        }
         | '&' l_expression // & and * are similar
+        {
+        	$$ = new deref_astnode($2);
+        }
         | l_expression '.' IDENTIFIER
+        {
+        	id_astnode *x = new id_astnode($3);
+        	$$ = new binary_astnode(".",$1,x);
+        }
         | l_expression PTR_OP IDENTIFIER	
+        {
+        	id_astnode *x = new id_astnode($3);
+        	$$ = new binary_astnode("->",$1,x);
+        }
         ;
 
 expression_list
         : expression
+        {
+        	$$ = new explist_astnode($1);
+        }
         | expression_list ',' expression
+        {
+        	$$ = new explist_astnode($1,$3);
+        }
 	;
 
 unary_operator
-        : '-'	
+        : '-'
+        {
+        	$$ = "UMinus";
+        }	
 	| '!' 	
+	{
+		$$ = "NOT";
+	}
 	;
 
 selection_statement
         : IF '(' expression ')' statement ELSE statement 
+        {
+        	$$ = new if_astnode($3,$5,$7);
+        }
 	;
 
 iteration_statement
 	: WHILE '(' expression ')' statement 	
+	{
+		$$ = new while_astnode($3,$5);
+	}
 	| FOR '(' expression ';' expression ';' expression ')' statement  //modified this production
+	{
+		$$ = new for_astnode($3,$5,$7,$9);
+	}
         ;
 
 declaration_list

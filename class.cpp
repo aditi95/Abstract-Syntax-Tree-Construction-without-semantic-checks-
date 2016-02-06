@@ -19,6 +19,8 @@ class exp_astnode : public abstract_astnode
 {
 	protected:
 		string exp_name;
+	public:
+		virtual void print() = 0;
 };
 
 class unary_astnode : public exp_astnode
@@ -64,9 +66,9 @@ class binary_astnode : public exp_astnode
 class float_astnode : public exp_astnode
 {
 	private:
-		string val;
+		float val;
 	public:
-		float_astnode(string s){val = s;}
+		float_astnode(float s){val = s;}
 		virtual void print()
 		{
 			cout<< "(FloatConst " << " "<<val<<")"; 
@@ -76,9 +78,9 @@ class float_astnode : public exp_astnode
 class int_astnode : public exp_astnode
 {
 	private:
-		string val;
+		int val;
 	public:
-		int_astnode(string s){val = s;}
+		int_astnode(int s){val = s;}
 		virtual void print()
 		{
 			cout<< "(IntConst " << " "<<val<<")"; 
@@ -97,28 +99,52 @@ class string_astnode : public exp_astnode
 		}
 };
 
+class explist_astnode : public exp_astnode
+{
+	private:
+		exp_astnode *l;
+		exp_astnode *e;
+	public:
+		explist_astnode(exp_astnode *e1)
+		{
+			e = e1;
+			l = 0;
+		}
+		explist_astnode(exp_astnode *y, exp_astnode *x)
+		{
+			l = y;
+			e = x;
+		}
+		virtual void print()
+		{
+			
+			if(l!=0){
+				l->print();
+				cout << "\n";
+			}
+			e->print(); 
+		}
+};
+
 class func_astnode : public exp_astnode
 {
 	private:
 		string val;
-		vector <exp_astnode *> args;
+		exp_astnode * args;
 	public:
 		func_astnode(string s){
 			val = s;
-			args = new vector<exp_astnode*>();
+			args =0;
 		}
-		void addEXPASTVec(vector <exp_astnode *> a)
-		{
-			args = a;
+		func_astnode(string s,exp_astnode * a){
+			val = s;
+			args =a;
 		}
 		virtual void print()
 		{
-			cout<< "(" <<val ;
-			for(int i = 0; i <args.size();i++)
-			{
-				args[i]->print();
-				cout<<endl;
-			} 
+			cout<< "(" <<val <<" ";
+			if(args!=0)
+				args->print(); 
 			cout<<")"; 
 		}
 };
@@ -127,6 +153,8 @@ class stmt_astnode : public abstract_astnode
 {
 	protected:
 		string stmt_name;
+	public:
+		virtual void print()=0;
 };
 
 class ass_astnode : public stmt_astnode
@@ -211,7 +239,34 @@ class return_astnode : public stmt_astnode
 		}
 
 };
+class assgn_astnode : public stmt_astnode
+{
+	private:
+		exp_astnode * left, *right;
+	public:
+		assgn_astnode()
+		{
+			stmt_name = "Ass";
+			left = 0;
+			right = 0;
+		}
+		assgn_astnode(exp_astnode *l, exp_astnode *r)
+		{
+			stmt_name = "Ass";
+			left = l;
+			right = r;
+		}
 
+		virtual void print()
+		{
+			cout<< "("<<stmt_name << " ";
+			if(left!=0)left->print();
+			cout <<" ";
+			if(right!=0)right->print();
+			cout<<")"; 
+		}
+
+};
 
 class for_astnode : public stmt_astnode
 {
@@ -271,9 +326,14 @@ class list_astnode : public stmt_astnode
 {
 	private:
 		stmt_astnode * stmt;
-		list_astnode * list;
+		stmt_astnode * list;
 	public:
-		list_astnode(stmt_astnode *s, list_astnode *l)
+		list_astnode(stmt_astnode *s)
+		{
+			stmt = s;
+			list = 0;
+		}
+		list_astnode(stmt_astnode *s, stmt_astnode *l)
 		{
 			stmt = s;
 			list = l;
@@ -281,9 +341,10 @@ class list_astnode : public stmt_astnode
 		virtual void print()
 		{
 			cout<< "(";
-			stmt->print();
-			cout<<"\n";
+			if(list != 0){
 			list->print();
+			cout<<"\n";}
+			stmt->print();
 			cout<<")"; 
 		}
 
@@ -292,9 +353,9 @@ class list_astnode : public stmt_astnode
 class block_astnode : public stmt_astnode
 {
 	private:
-		list_astnode *block;
+		stmt_astnode *block;
 	public:
-		block_astnode(list_astnode *l)
+		block_astnode(stmt_astnode *l)
 		{
 			stmt_name = "Block";
 			block = l;
@@ -309,10 +370,12 @@ class block_astnode : public stmt_astnode
 
 };
 
-class ref_astnode : public abstract_astnode
+class ref_astnode : public exp_astnode
 {
 	protected:
 		string ref_name;
+	public:
+		virtual void print()=0;
 };
 
 class id_astnode : public ref_astnode
@@ -336,18 +399,13 @@ class id_astnode : public ref_astnode
 class arrref_astnode : public ref_astnode
 {
 	private:
-		id_astnode *id;
-		vector <exp_astnode *> params;
+		exp_astnode *id;
+		exp_astnode * params;
 	public:
-		arrref_astnode(id_astnode *a,vector <exp_astnode *> b)
+		arrref_astnode(exp_astnode *a,exp_astnode * b)
 		{
 			id=a;
-			params = new vector<exp_astnode*>();
-		}
-
-		void addEXPAST(exp_astnode * exp_ast)
-		{
-			(*params).push_back(exp_ast);
+			params = b;
 		}
 
 		virtual void print()
@@ -355,11 +413,7 @@ class arrref_astnode : public ref_astnode
 			cout<< "(";
 			id->print();
 			cout<<" [ ";
-			for(int i = 0; i<params.size();i++)
-			{
-				params[i]->print();
-				cout<<"\n";
-			}
+			params->print();
 			cout<<"]";
 		}
 
@@ -368,9 +422,9 @@ class arrref_astnode : public ref_astnode
 class ptr_astnode : public ref_astnode
 {
 	private:
-		ref_astnode *id;
+		exp_astnode *id;
 	public:
-		ptr_astnode(ref_astnode *a)
+		ptr_astnode(exp_astnode *a)
 		{
 			id=a;
 		}
@@ -387,9 +441,9 @@ class ptr_astnode : public ref_astnode
 class deref_astnode : public ref_astnode
 {
 	private:
-		ref_astnode *id;
+		exp_astnode *id;
 	public:
-		deref_astnode(ref_astnode *a)
+		deref_astnode(exp_astnode *a)
 		{
 			id=a;
 		}
