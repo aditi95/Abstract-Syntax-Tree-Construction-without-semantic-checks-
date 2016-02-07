@@ -233,9 +233,9 @@ expression_list
 
 unary_operator
         : '-'
-        {$$ = "-";}	
+        {$$ = "UMinus";}	
 	| '!' 	
-	{$$ = "!";}
+	{$$ = "Not";}
 	;
 
 selection_statement

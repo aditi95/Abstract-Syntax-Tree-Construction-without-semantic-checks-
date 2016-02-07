@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-
+#include <algorithm>
 using namespace std;
 //add ident to print
 /*void ident(int n)
@@ -11,7 +11,7 @@ using namespace std;
 class abstract_astnode
 {
 	public:
-		virtual void print (int ident) = 0;
+		virtual int print (int ident) = 0;
 		// virtual string generate_code(const symbolTable&) = 0;
 		// virtual basic_types getType() = 0;
 		// virtual bool checkTypeofAST() = 0;
@@ -25,7 +25,7 @@ class exp_astnode : public abstract_astnode
 	protected:
 		string exp_name;
 	public:
-		virtual void print(int ident) = 0;
+		virtual int print(int ident) = 0;
 		virtual ~exp_astnode(){};
 };
 
@@ -40,12 +40,13 @@ class unary_astnode : public exp_astnode
 			exp_name = s;
 			left = l;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			
 			cout<< "("<<exp_name << ' ';
-			left->print(0);
+			int x = left->print(ident + exp_name.size()+2);
 			cout<<")"; 
+			return x+3+exp_name.size();
 		}
 		virtual ~unary_astnode()
 		{
@@ -64,13 +65,14 @@ class binary_astnode : public exp_astnode
 			left = l;
 			right = r;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<exp_name << ' ';
-			left->print(0);
+			int x = left->print(ident+ exp_name.size()+2);
 			cout<<' ';
-			right->print(0);
+			int y = right->print(ident+ exp_name.size()+2+x+1);
 			cout<<")"; 
+			return x+y+exp_name.size()+4;
 		}
 		virtual ~binary_astnode()
 		{
@@ -86,9 +88,11 @@ class float_astnode : public exp_astnode
 		float val;
 	public:
 		float_astnode(float s){val = s;}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
-			cout<< "(FloatConst " << ' '<<val<<")"; 
+			cout<< "(FloatConst "<<val<<")"; 
+			string s = to_string(val);
+			return 13 + s.size();
 		}
 };
 
@@ -98,9 +102,11 @@ class int_astnode : public exp_astnode
 		int val;
 	public:
 		int_astnode(int s){val = s;}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
-			cout<< "(IntConst " << ' '<<val<<")"; 
+			cout<< "(IntConst "<<val<<")"; 
+			string s = to_string(val);
+			return s.size() + 11;
 		}
 };
 
@@ -110,9 +116,10 @@ class string_astnode : public exp_astnode
 		string val;
 	public:
 		string_astnode(string s){val = s;}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
-			cout<< "(StringConst " << ' '<<val<<")"; 
+			cout<< "(StringConst "<<val<<")"; 
+			return val.size() + 14;
 		}
 };
 
@@ -132,16 +139,19 @@ class explist_astnode : public exp_astnode
 			l = y;
 			e = x;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
+			int x = 0, y = 0;
 			if(l != 0){
-				l->print(ident);
+				x = l->print(ident);
 				cout<<"\n";
 				cout<<string(ident, ' ');
-				e->print(ident);
+				y = e->print(ident);
 			}
 			else 
-			e->print(ident); 
+			x = e->print(ident);
+			return max(x, y); 
+		
 		}
 		virtual ~explist_astnode()
 		{
@@ -165,11 +175,13 @@ class func_astnode : public exp_astnode
 			val = s;
 			args = a;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
+			int x = 0;
 			cout<< "(" <<val <<' ';
-			if(args!=0)args->print(0);
+			if(args!=0)x = args->print(ident+2+val.size());
 			cout<<")"; 
+			return x + val.size() + 3;
 		}
 		virtual ~func_astnode()
 		{
@@ -182,7 +194,7 @@ class stmt_astnode : public abstract_astnode
 	protected:
 		string stmt_name;
 	public:
-		virtual void print(int ident)=0;
+		virtual int print(int ident)=0;
 		virtual ~stmt_astnode(){}
 };
 
@@ -197,13 +209,14 @@ class ass_astnode : public stmt_astnode
 			left = l;
 			right = r;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<stmt_name << ' ';
-			left->print(0);
+			int x = left->print(ident+2+stmt_name.size());
 			cout<<' ';
-			right->print(0);
+			int y = right->print(ident + 3 + stmt_name.size()+ x);
 			cout<<")"; 
+			return stmt_name.size()+x+y+4;
 		}
 		virtual ~ass_astnode()
 		{
@@ -228,17 +241,18 @@ class if_astnode : public stmt_astnode
 			right = r;
 			middle = m;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<stmt_name << ' ';
-			left->print(0);
+			int x = left->print(ident + 2 + stmt_name.size());
 			cout<<"\n";
 			cout<<string(ident + 4, ' ');
-			middle->print(ident + 4);
+			int y = middle->print(ident + 4);
 			cout<<"\n";
 			cout<<string(ident + 4, ' ');
-			right->print(ident + 4);
+			int z = right->print(ident + 4);
 			cout<<")"; 
+			return max(max(y,z), x + 4);
 		}
 		virtual ~if_astnode()
 		{
@@ -256,9 +270,10 @@ class empty_astnode : public stmt_astnode
 	public:
 		empty_astnode(){stmt_name = "Empty";}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
-			cout<< "("<<stmt_name<<")"; 
+			cout<< "("<<stmt_name<<")";
+			return 2+ stmt_name.size(); 
 		}
 		virtual ~empty_astnode()
 		{
@@ -279,11 +294,12 @@ class return_astnode : public stmt_astnode
 			left = l;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<stmt_name << ' ';
-			left->print(0);
+			int x = left->print(ident + 2 + stmt_name.size());
 			cout<<")"; 
+			return x  + stmt_name.size() + 3;
 		}
 		virtual ~return_astnode()
 		{
@@ -309,13 +325,15 @@ class assgn_astnode : public stmt_astnode
 			right = r;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
+			int x = 0, y = 0;
 			cout<< "("<<stmt_name << ' ';
-			if(left!=0)left->print(0);
+			if(left!=0)x = left->print(ident + stmt_name.size()+2);
 			cout << ' ';
-			if(right!=0)right->print(0);
+			if(right!=0)y = right->print(ident+ x+ 3 + stmt_name.size());
 			cout<<")"; 
+			return stmt_name.size() + 4 + x + y;
 		}
 		virtual ~assgn_astnode()
 		{
@@ -342,20 +360,21 @@ class for_astnode : public stmt_astnode
 			stmt = s;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<stmt_name <<' ';
-			left->print(0);
+			int x = left->print(ident+5);
 			cout<<"\n";
 			cout<<string(ident + 5, ' ');
-			middle->print(ident + 5);
+			int y = middle->print(ident + 5);
 			cout<<"\n";
 			cout<<string(ident + 5, ' ');
-			right->print(ident + 5);
+			int z = right->print(ident + 5);
 			cout<<"\n";
 			cout<<string(ident + 5, ' ');
-			stmt->print(ident + 5);
+			int w = stmt->print(ident + 5);
 			cout<<")"; 
+			return max(5+x, max(y,max(z,w+1)));
 		}
 		virtual ~for_astnode()
 		{
@@ -382,14 +401,15 @@ class while_astnode : public stmt_astnode
 			stmt = s;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<stmt_name << ' ';
-			left->print(0);
+			int x = left->print(ident+7);
 			cout<<"\n";
 			cout<<string(ident + 7, ' ');
-			stmt->print(ident + 7);
-			cout<<")"; 
+			int y = stmt->print(ident + 7);
+			cout<<")";
+			return max(7+x, y+1); 
 		}
 		virtual ~while_astnode()
 		{
@@ -415,16 +435,18 @@ class list_astnode : public stmt_astnode
 			stmt = s;
 			list = l;
 		}
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
+			int x = 0, y= 0;
 			if(list != 0){
-				list->print(ident);
+				x = list->print(ident);
 				cout<<"\n";
 				cout<<string(ident, ' ');
-				stmt->print(ident);
+				y = stmt->print(ident);
 			}
 			else 
-			stmt->print(ident);
+			y = stmt->print(ident);
+			return max(x, y);
 			
 		}
 		virtual ~list_astnode()
@@ -448,11 +470,12 @@ class block_astnode : public stmt_astnode
 			block = l;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "(Block [";
-			block->print(ident + 8);
+			int x = block->print(ident + 8);
 			cout<<"])";
+			return 10 + x;
 		}
 		virtual ~block_astnode()
 		{
@@ -468,7 +491,7 @@ class ref_astnode : public exp_astnode
 	protected:
 		string ref_name;
 	public:
-		virtual void print(int ident)=0;
+		virtual int print(int ident)=0;
 		virtual ~ref_astnode(){}
 };
 
@@ -483,9 +506,10 @@ class id_astnode : public ref_astnode
 			id_name = name;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "("<<ref_name<<" \"" <<id_name<<"\")" ;
+			return 5+ref_name.size()+id_name.size();
 		}
 
 };
@@ -502,13 +526,14 @@ class arrref_astnode : public ref_astnode
 			params = b;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
 			cout<< "(";
-			id->print(0);
-			cout<<" [";
-			params->print(0);
-			cout<<"]";
+			int x = id->print(ident+1);
+			cout<<"[";
+			int y = params->print(ident+2+x);
+			cout<<"])";
+			return 4+x+y;
 		}
 		virtual ~arrref_astnode()
 		{
@@ -527,11 +552,12 @@ class ptr_astnode : public ref_astnode
 			id=a;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
-			cout<< "( *";
-			id->print(0);
+			cout<< "(* ";
+			int x = id->print(ident);
 			cout<<")";
+			return 4+x;
 		}
 		virtual ~ptr_astnode()
 		{
@@ -550,11 +576,13 @@ class deref_astnode : public ref_astnode
 			id=a;
 		}
 
-		virtual void print(int ident)
+		virtual int print(int ident)
 		{
-			cout<< "( &";
-			id->print(0);
+			cout<< "(& ";
+			int x = id->print(ident);
 			cout<<")";
+			return 4 + x;
+
 		}
 		virtual ~deref_astnode()
 		{
