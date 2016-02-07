@@ -38,7 +38,7 @@ type_specifier
 
 base_type 
         : VOID 	
-        | INT {std::cout<<"dval "<<d_val__<<endl;}  
+        | INT   
 	| FLOAT 
         | STRUCT IDENTIFIER 
         ;
@@ -116,7 +116,7 @@ assignment_statement
 	: ';' 
 	{$$ = new empty_astnode(); }								
 	|  l_expression '=' expression ';'	
-	{std::cout<<$1<<" 1 "<<$3<<endl;$$ = new assgn_astnode($1, $3);std::cout<<$1<<" 1 "<<$3<<endl;}
+	{$$ = new assgn_astnode($1, $3);}
 	;
 
 expression
@@ -136,7 +136,7 @@ equality_expression
 	: relational_expression 
 	{$$ = $1;}
     | equality_expression EQ_OP relational_expression 	
-	        {$$ = new binary_astnode("EQ_OP",$1,$3);std::cout<<$1<<" 1 "<<$3<<endl;}
+	        {$$ = new binary_astnode("EQ_OP",$1,$3);}
 	| equality_expression NE_OP relational_expression
 	        {$$ = new binary_astnode("NE_OP",$1,$3);}
 	;
@@ -145,7 +145,7 @@ relational_expression
 	: additive_expression
 	{$$ = $1;}
         | relational_expression '<' additive_expression 
-	    {$$ = new binary_astnode("LT",$1,$3);std::cout<<$1<<" 2 "<<$3<<endl;}
+	    {$$ = new binary_astnode("LT",$1,$3);}
 
 	| relational_expression '>' additive_expression 
 	        {$$ = new binary_astnode("GT",$1,$3);}
@@ -192,7 +192,7 @@ postfix_expression
 	| IDENTIFIER '(' expression_list ')'
 	{$$ = new func_astnode($1, $3);} 
 	| l_expression INC_OP 			
-	{std::cout<<"yesh"<<endl;$$ = new unary_astnode("PP", $1);std::cout<<$1<<" 3"<<endl;}	
+	{$$ = new unary_astnode("PP", $1);}	
 	;
 
 primary_expression
@@ -209,7 +209,7 @@ primary_expression
 
 l_expression
         : IDENTIFIER
-        {$$ = new id_astnode($1);std::cout<<$1<<endl;}
+        {$$ = new id_astnode($1);}
         | l_expression '[' expression ']'
         {$$ = new arrref_astnode($1, $3);  } 	
         | '*' l_expression
@@ -247,7 +247,7 @@ iteration_statement
 	: WHILE '(' expression ')' statement 
 	{$$ = new while_astnode($3, $5);}	
 	| FOR '(' expression ';' expression ';' expression ')' statement  //modified this production
-	{$$ = new for_astnode($3,$5, $7, $9);printf("in for \n");	}
+	{$$ = new for_astnode($3,$5, $7, $9);	}
     ;
 	
 

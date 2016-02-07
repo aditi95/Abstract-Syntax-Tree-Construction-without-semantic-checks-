@@ -1,45 +1,9 @@
-dval 0
-dval 0
-x
-x
-0x8e9f50 2 0x8e9ec0
-x
-yesh
-jkljlhknkkjbj0x8e9af0 3
-in for 
-y
-x
-x
-0x8ea310 1 0x8ea450
-0x8ea310 1 0x8ea450
-y
-y
-0x8ea540 1 0x8e9ce0
-0x8ea540 1 0x8e9ce0
-a
-i
-j
-0x8eaca0 1 0x8eac80
-0x8eaca0 1 0x8eac80
-(Block [(For (Ass_exp (Id "x" ) (IntConst  0))
-             (LT_OP (Id "x" ) (IntConst  10))
-             (PP (Id "x" ))
+(Block [(For (Assign_exp (Id "x") (IntConst 0))
+             (LT (Id "x") (IntConst 10))
+             (PP (Id "x"))
              (Empty))
-        (If (GT_OP (Id "y" ) (IntConst  1))
-            (Block [(Ass (Id "x" ) (Minus (Id "x" ) (IntConst  1)))
-                    (Ass (Id "y" ) (Plus (Id "y" ) (IntConst  1)))])
+        (If (GT (Id "y") (IntConst 1))
+            (Block [(Ass (Id "x") (Minus (Id "x") (IntConst 1)))
+                    (Ass (Id "y") (Plus (Id "y") (IntConst 1)))])
             (Empty))
-        (Ass ((((Id "a" ) [ (Id "i" )] [ (Id "j" )] [ (IntConst  455)] (IntConst  12))])destroying block
-deleting empty
-for destructor
-deleting list
-destroying block
-deleting assgn
-deleting list
-deleting assgn
-deleting list
-deleting empty
-deleting if
-deleting list
-deleting assgn
-deleting list
+        (Ass ((((Id "a")[(Id "i")])[(Id "j")])[(IntConst 455)]) (IntConst 12))])

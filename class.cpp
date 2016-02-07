@@ -36,7 +36,6 @@ class unary_astnode : public exp_astnode
 	public:
 		unary_astnode(string s, exp_astnode *l)
 		{
-			cout<<"jkljlhknkkjbj";
 			exp_name = s;
 			left = l;
 		}
@@ -222,7 +221,6 @@ class ass_astnode : public stmt_astnode
 		{
 			delete left;
 			delete right;
-			cout<<"destroy assignment"<<endl;
 		}
 		
 
@@ -259,7 +257,6 @@ class if_astnode : public stmt_astnode
 			delete left;
 			delete middle;
 			delete right;
-			cout << "deleting if"<<endl;
 		}
 		
 
@@ -277,7 +274,6 @@ class empty_astnode : public stmt_astnode
 		}
 		virtual ~empty_astnode()
 		{
-			cout << "deleting empty\n";
 		}
 
 };
@@ -339,7 +335,6 @@ class assgn_astnode : public stmt_astnode
 		{
 			delete left;
 			delete right;
-			cout << "deleting assgn" << endl;
 		}
 		
 };
@@ -382,7 +377,6 @@ class for_astnode : public stmt_astnode
 			delete middle;
 			delete right;
 			delete stmt;
-			cout << "for destructor"<<endl;
 		}
 		
 
@@ -453,7 +447,6 @@ class list_astnode : public stmt_astnode
 		{
 			delete list;
 			delete stmt;
-			cout << "deleting list"<<endl;
 		}
 		
 
@@ -479,7 +472,6 @@ class block_astnode : public stmt_astnode
 		}
 		virtual ~block_astnode()
 		{
-			cout << "destroying block"<<endl;
 			delete block;
 		}
 
