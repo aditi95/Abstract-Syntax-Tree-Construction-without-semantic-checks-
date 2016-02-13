@@ -10,9 +10,9 @@
 %type<STRING> unary_operator INC_OP IDENTIFIER STRING_LITERAL
 %type<INT1> INT_CONSTANT
 %type<FLOAT1> FLOAT_CONSTANT
-%type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression l_expression constant_expression expression_list
-%type<STMAST> compound_statement statement assignment_statement selection_statement iteration_statement statement_list
-%type<REFAST> declarator
+%type<EXPAST> expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression primary_expression postfix_expression constant_expression expression_list
+%type<STMAST> compound_statement statement selection_statement iteration_statement statement_list assignment_statement
+%type<REFAST> declarator l_expression parameter_declaration
 
 %%
 
@@ -199,7 +199,9 @@ primary_expression
 	: l_expression
 	{$$ = $1;}
         | l_expression '=' expression   
-        {$$ = new binary_astnode("Assign_exp",$1, $3);}
+        {$$ = new binary_astnode("Ass",$1, $3);}
+        | '&' '(' l_expression ')'
+        {$$ = new ptr_astnode($3);}
         | INT_CONSTANT {$$ = new int_astnode($1);}
 	| FLOAT_CONSTANT {$$ = new float_astnode($1);}
         | STRING_LITERAL{$$ = new string_astnode($1);}
@@ -212,16 +214,14 @@ l_expression
         {$$ = new id_astnode($1);}
         | l_expression '[' expression ']'
         {$$ = new arrref_astnode($1, $3);  } 	
-        | '*' l_expression
-        {$$ = new ptr_astnode($2);}
-        | '&' l_expression // & and * are similar
-        {$$ = new deref_astnode($2);}
+        | '*' '(' l_expression ')'
+        {$$ = new deref_astnode($3);}
         | l_expression '.' IDENTIFIER
         {id_astnode *x = new id_astnode($3);
-        $$ = new binary_astnode(".",$1,x);}
+        $$ = new member_astnode($1,x);}
         | l_expression PTR_OP IDENTIFIER
         {id_astnode *x = new id_astnode($3);
-        $$ = new binary_astnode("PTR_OP",$1,x);}
+        $$ = new arrow_astnode($1,x);}
         ;
 
 expression_list
