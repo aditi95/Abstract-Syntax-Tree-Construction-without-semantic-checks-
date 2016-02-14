@@ -30,6 +30,7 @@ struct														return Parser::STRUCT;
 "-"															return '-';
 "+"                                         				return '+';
 "*"															return '*';
+"&"															return '&';
 "/"															return '/';
 ","                                         				return ',';
 "<"															return '<';

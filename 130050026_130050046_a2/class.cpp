@@ -197,35 +197,6 @@ class stmt_astnode : public abstract_astnode
 		virtual ~stmt_astnode(){}
 };
 
-class ass_astnode : public stmt_astnode
-{
-	private:
-		exp_astnode * left, *right;
-	public:
-		ass_astnode(exp_astnode *l, exp_astnode *r)
-		{
-			stmt_name = "Ass";
-			left = l;
-			right = r;
-		}
-		virtual int print(int ident)
-		{
-			cout<< "("<<stmt_name << ' ';
-			int x = left->print(ident+2+stmt_name.size());
-			cout<<' ';
-			int y = right->print(ident + 3 + stmt_name.size()+ x);
-			cout<<")"; 
-			return stmt_name.size()+x+y+4;
-		}
-		virtual ~ass_astnode()
-		{
-			delete left;
-			delete right;
-		}
-		
-
-};
-
 class if_astnode : public stmt_astnode
 {
 	private:
@@ -277,7 +248,6 @@ class empty_astnode : public stmt_astnode
 		}
 
 };
-
 
 class return_astnode : public stmt_astnode
 {
@@ -486,6 +456,34 @@ class assgn_astnode : public stmt_astnode
 		}	
 };
 
+class ass_astnode : public exp_astnode
+{
+	private:
+		ref_astnode *left;
+		exp_astnode *right;
+	public:
+		ass_astnode(ref_astnode *l, exp_astnode *r)
+		{
+			exp_name = "Ass";
+			left = l;
+			right = r;
+		}
+		virtual int print(int ident)
+		{
+			cout<< "("<<exp_name << ' ';
+			int x = left->print(ident+2+exp_name.size());
+			cout<<' ';
+			int y = right->print(ident + 3 + exp_name.size()+ x);
+			cout<<")"; 
+			return exp_name.size()+x+y+4;
+		}
+		virtual ~ass_astnode()
+		{
+			delete left;
+			delete right;
+		}
+};
+
 class id_astnode : public ref_astnode
 {
 	private:
@@ -519,12 +517,12 @@ class member_astnode : public ref_astnode
 
 		virtual int print(int ident)
 		{
-			cout<< "(. ";
+			cout<< "(Member ";
 			int x = id->print(ident);
 			cout<<" ";
 			int y = mem->print(ident);
 			cout<<")";
-			return 5+x+y;
+			return 10+x+y;
 		}
 		virtual ~member_astnode()
 		{
@@ -547,12 +545,12 @@ class arrow_astnode : public ref_astnode
 
 		virtual int print(int ident)
 		{
-			cout<< "(-> ";
+			cout<< "(Arrow ";
 			int x = id->print(ident);
 			cout<<" ";
 			int y = mem->print(ident);
 			cout<<")";
-			return 6+x+y;
+			return 9+x+y;
 		}
 		virtual ~arrow_astnode()
 		{
@@ -575,12 +573,12 @@ class arrref_astnode : public ref_astnode
 
 		virtual int print(int ident)
 		{
-			cout<< "(";
-			int x = id->print(ident+1);
+			cout<< "(Arrayref";
+			int x = id->print(ident+9);
 			cout<<"[";
-			int y = params->print(ident+2+x);
+			int y = params->print(ident+10+x);
 			cout<<"])";
-			return 4+x+y;
+			return 12+x+y;
 		}
 		virtual ~arrref_astnode()
 		{
@@ -601,10 +599,10 @@ class ptr_astnode : public exp_astnode
 
 		virtual int print(int ident)
 		{
-			cout<< "(& ";
+			cout<< "(PTR ";
 			int x = id->print(ident);
 			cout<<")";
-			return x+4;
+			return x+6;
 		}
 		virtual ~ptr_astnode()
 		{
@@ -624,10 +622,10 @@ class deref_astnode : public ref_astnode
 
 		virtual int print(int ident)
 		{
-			cout<< "(* ";
+			cout<< "(Deref ";
 			int x = id->print(ident);
 			cout<<")";
-			return 4 + x;
+			return 8 + x;
 
 		}
 		virtual ~deref_astnode()
